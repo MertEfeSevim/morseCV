@@ -1,0 +1,36 @@
+import cv2
+import numpy as np
+
+cap = cv2.VideoCapture(0)
+kernel = np.ones((5,5),np.uint8)
+
+
+while True:
+
+    _,frame = cap.read()
+    resized_frame = cv2.resize(frame, (340, 220))
+
+    lower = np.array([254,254,254])
+    upper = np.array([255,255,255])
+
+    mask = cv2.inRange(resized_frame,lower,upper)
+    res = cv2.bitwise_and(resized_frame,resized_frame,mask=mask)
+
+    erosion = cv2.erode(res, kernel, iterations=1)
+    dilation = cv2.dilate(erosion, kernel, iterations=1)
+    closing = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, kernel)
+
+    median = cv2.medianBlur(dilation, 15)
+
+    #cv2.imshow('resized_frame', resized_frame)
+    #cv2.imshow('res', res)
+    #cv2.imshow('erosion', erosion)
+    #cv2.imshow('dilation', dilation)
+    cv2.imshow('median', median)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        print("Camera closed.")
+        break
+
+cv2.destroyAllWindows()
+cap.release()
